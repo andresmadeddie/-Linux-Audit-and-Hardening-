@@ -1,0 +1,10 @@
+adam
+billy
+instructor
+jane
+john
+max
+sally
+student
+sysadmin
+vagrant
