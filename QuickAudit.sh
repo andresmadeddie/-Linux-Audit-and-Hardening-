@@ -40,4 +40,3 @@ for file in $files; do echo $(ls -l $file); done >>$sysInfo
 # End
 echo -e "\nEnd of Audit\n" >>$sysInfo
 echo "View report at $sysInfo"
-

@@ -1,111 +1,135 @@
-## Quick audit
-
-The next script give a general gist of the system. Information include Host name, Ip, user's priviledges, OS, RAM, CPU, disk, Processes, DNS, executables, and sensitive files permissions.
-
-Script: [QuickAudit](/QuickAudit.sh)
+- Audit
+- Dinanic Analysis
+- Hardening
 
 ---
 
-## Audit the  file system
+## Audit
 
-1. check auth.log for suspicioud logins login attemps
+- ### Quick audit
+
+    The next script give a general gist of the system. Information include Host name, Ip, user's priviledges, OS, RAM, CPU, disk, Processes, DNS, executables, and sensitive files permissions.
+
+    Script: [QuickAudit](/QuickAudit.sh)
+
+    ` sudo ./quickAudit.sh`
 
     ![1](/Images/1.PNG)
 
-2. check scripts in /tmp directory
-
-    `ls -lah /tmp | grep '[-r][-w]x' | grep ^-`
-
     ![2](/Images/2.PNG)
 
-3. Check /home directory users match with the baseline. 
+    ---
 
-    `a=0; echo -e "\nExtra Users:" && for user in $(ls /home); do if [ ! $(grep $user ~/usersBaseline.txt) ]; then echo $user && a=$(($a+1)); fi; done ; if [ $a -eq 0 ]; then echo "No extra users found"; fi`
+- ### Audit file system
 
-    ![3](/Images/3.PNG)
+    1. check auth.log for suspicious logins login attemps
 
-4. Check that only root is 0 UID
+         ![3](/Images/3.PNG)      
 
-    `for users in $(ls /home); do id $users; done | grep uid=0`
+    2. check scripts in /tmp directory
 
-    ![4](/Images/4.PNG)
+        `ls -lah /tmp | grep '[-r][-w]x' | grep ^-`
 
----
+         ![4](/Images/4.PNG)
 
-## Audit processes
+    3. Check unmathched users between the /home directory and the baseline. 
 
-1. Check running processes, sort by CPU
+        `a=0; echo -e "\nUnmatched Users List:" && for user in $(ls /home); do if [ ! $(grep $user ~/usersBaseline.txt) ]; then echo $user && a=$(($a+1)); fi; done ; if [ $a -eq 0 ]; then echo "No unmatched users found"; fi`
+
+        ![5](/Images/5.PNG)
+
+    4. Check that only root is 0 UID
+
+        `for users in $(ls /home); do id $users; done | grep uid=0`
+
+        ![6](/Images/6.PNG)
+
+    ---
+
+- ### Audit processes
+
+    1. Check running processes, sort by CPU
+
+            ```
+            top
+            x
+            ```
+
+        ![7](/Images/7.PNG)
+
+    2. Account: task started by host, sleeping tasks, and CPU usage.
+
+        ![8](/Images/8.PNG)
+
+    3. Sort by user of interest
 
         ```
-        top
-        x
+        u
+        jack
         ```
 
-    ![5](/Images/5.PNG)
+        ![9](/Images/9.PNG)
 
-2. Account: task started by host, sleeping tasks, and CPU usage.
+    4. Kill all processes from user
 
-    ![6](/Images/6.PNG)
+        `sudo killall -u jack`
 
-3. Sort by user of interest
+    ![10](/Images/10.PNG)
 
-    ```
-    u
-    jack
-    ```
+    5. Inspect processes
 
-    ![7](/Images/7.PNG)
+    ![11](/Images/11.PNG)
 
-4. Kill all processes from user
+    ---
 
-    `sudo killall -u jack`
+- ### Lynis Audit
 
-    ![8](/Images/8.PNG)
+    Update system, Install lynis, and audit system
 
+        ```
+        sudo apt update && apt upgrade
+
+        sudo apt install -y linys
+
+        sudo lynis audit system
+        ```
+
+    ---
 ---
 
-## Dinamic Analysis
+## Dinanic Analysis
 
 Use a sandbox to analyse a suspicious script.
 
 1. Check Script
     `nano a9xk.sh`
 
-    ![9](/Images/9.PNG)
+    ![12](/Images/12.PNG)
 
 2. run script
 
     `sudo ./a9xk.sh`
 
-  
-
 3. inspect processes
 
     `top`
 
-    ![10](/Images/10.PNG)
+    ![13](/Images/13.PNG)
 
 4. Kill processes by command
 
     `sudo killall stress`
 
-    ![11](/Images/11.PNG)
+    ![14](/Images/14.PNG)
+
+5. Inspect processes
+
+
+    ![15](/Images/15.PNG)
 
 ---
 
-## Lynis Audit
-
-Update system, Install lynis, and audit system
-
-    ```
-    sudo apt update && apt upgrade
-
-    sudo apt install -y linys
-
-    sudo lynis audit system
-    ```
-
----
+# Hardening
 
 ## Hardening
 Correct vulnerabilities found during the audit. Manipulate Users and Groups to give the rights priviledges accordingly wiht less priviledge principle. Moreover, install packages for tripwire, lynis, and chkrootkit.
