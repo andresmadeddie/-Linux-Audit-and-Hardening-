@@ -167,7 +167,7 @@ Use a sandbox to analyse a suspicious script.
 - ### Groups - Users
     Observations:
 
-    Users adam, billy, sally, and max should be part only of thir primary and deverlopers groups. User Jack must be removed.
+    Users adam, billy, sally, and max should be part only of theirs primary and deverlopers groups. User Jack and group hax0rs must be removed.
 
     1. Remove Jack user
         - Lock account
@@ -186,28 +186,43 @@ Use a sandbox to analyse a suspicious script.
 
             `cat /etc/group | grep sudo`
 
-        ![16](/Images/16.PNG)
+            ![16](/Images/16.PNG)
 
     2. Change Adam's UID
 
-        - Look for a GID availability
+        - Check if adam's group exists
 
-            `cat /etc/group | awk '{print $3}' FS=':' | sort`
+            `cat /etc/group | grep adam` 
 
             ![17](/Images/17.PNG)
 
-        - Check UID availablity
-            
-            `cat /etc/passwd | awk '{print $3}' FS=':' | sort`
-            
+        - Check for an unassigned UID
+
+            `cat /etc/passwd | awk -F : '{print $3}' | sort` 
+
             ![18](/Images/18.PNG)
 
         - Change UID and GID
+            
+            `sudo nano /etc/passwd`
         
-            'sudo usermod -u 1014 -G 1014
+            Manually Change adam's UID and GID from 0 to 1014 and 1009 respectively
         
-        `sudo usermod -u 
+           ![19](/Images/19.PNG)
 
+           `Ctrl x`
+
+           `y` 
+           
+           `enter`    
+        
+        - Check changes
+
+            `id adam`
+
+            ![20](/Images/20.PNG)
+
+       
     3. Made users adam, billy, sally, and max part only of their primary and developers groups.
         - Create developers group
 
@@ -215,13 +230,29 @@ Use a sandbox to analyse a suspicious script.
 
         - Add users to developers group and exclude them form any other group
 
-            `users=(adam billy, sally, max); for user in ${users[@]}; do sudo usermod -G developers $user; done`
+            `users=(adam billy sally max); for user in ${users[@]}; do sudo usermod -G developers $user; done`
 
-    4. Check changes
+        - Check changes
 
-        `for user in ${users[@]}; do echo -e "$user: $(id $user)"; done`
+            `users=(adam billy sally max); for user in ${users[@]}; do echo -e "$user: $(id $user)"; done`
+            
+            ![21](/Images/21.PNG)
 
+    4. Remove Group hax0rs
 
+        - remove hx0rs
+
+            `sudo delgroup hax0rs`
+
+            ![22](/Images/22.PNG)
+
+        - Verified Changes
+
+            `cat /etc/group | grep hax0rs`
+
+            ![23](/Images/23.PNG)
+
+---
 
 
 
