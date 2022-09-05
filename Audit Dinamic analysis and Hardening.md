@@ -40,11 +40,39 @@
 
     4. Check that only root is 0 UID
 
-        `for users in $(ls /home); do id $users; done | grep uid=0`
+        `for user in $(ls /home); do echo -e "$user: $(id $user)"; done | grep uid=0`
 
         ![6](/Images/6.PNG)
 
-    ---
+    5. Check Users Sudo privileges
+
+        `for user in $(ls /home); do echo -e "$user:\n$(sudo -lU $user)\n\n\n"; done`
+
+        ![6a](/Images/6a.PNG)
+
+    6. Check sudoers file
+
+        `sudo cat /etc/sudoers`    
+
+        ![6b](/Images/6b.PNG)
+
+    7. Check Users and groups UID GID
+
+        `for user in $(ls /home); do id $user; done`
+
+        ![6c](/Images/6c.PNG)
+
+    Observations: 
+    
+    - User Jack does not match the baseline.
+    - User Adam has 0 UID
+    - str.sh script exists on the /tmp directory owned by user Jack.
+    - Jack user has full sudo privilege
+    - Max user has less sudo privilege
+    - Jack is in the sudo Group
+    - Max is in the hax0rs group
+
+        ---
 
 - ### Audit processes
 
@@ -74,11 +102,16 @@
 
         `sudo killall -u jack`
 
-    ![10](/Images/10.PNG)
+        ![10](/Images/10.PNG)
 
     5. Inspect processes
 
-    ![11](/Images/11.PNG)
+        ![11](/Images/11.PNG)
+
+
+    Observations: 
+
+    Processes were running in the system related to the script str.sh owned by user jack.
 
     ---
 
@@ -129,9 +162,69 @@ Use a sandbox to analyse a suspicious script.
 
 ---
 
-# Hardening
-
 ## Hardening
+
+- ### Groups - Users
+    Observations:
+
+    Users adam, billy, sally, and max should be part only of thir primary and deverlopers groups. User Jack must be removed.
+
+    1. Remove Jack user
+        - Lock account
+
+            `sudo usermod -L jack`      
+
+        - Remove user
+
+            `sudo deluser --remove-home --remove-all-files jack`
+
+        - Check user does not exists in the passwd file
+
+            `cat /etc/passwd |grep jack`
+
+        - Check user does not exists in the sudo group 
+
+            `cat /etc/group | grep sudo`
+
+        ![16](/Images/16.PNG)
+
+    2. Change Adam's UID
+
+        - Look for a GID availability
+
+            `cat /etc/group | awk '{print $3}' FS=':' | sort`
+
+            ![17](/Images/17.PNG)
+
+        - Check UID availablity
+            
+            `cat /etc/passwd | awk '{print $3}' FS=':' | sort`
+            
+            ![18](/Images/18.PNG)
+
+        - Change UID and GID
+        
+            'sudo usermod -u 1014 -G 1014
+        
+        `sudo usermod -u 
+
+    3. Made users adam, billy, sally, and max part only of their primary and developers groups.
+        - Create developers group
+
+            `sudo addgroup developers`
+
+        - Add users to developers group and exclude them form any other group
+
+            `users=(adam billy, sally, max); for user in ${users[@]}; do sudo usermod -G developers $user; done`
+
+    4. Check changes
+
+        `for user in ${users[@]}; do echo -e "$user: $(id $user)"; done`
+
+
+
+
+
 Correct vulnerabilities found during the audit. Manipulate Users and Groups to give the rights priviledges accordingly wiht less priviledge principle. Moreover, install packages for tripwire, lynis, and chkrootkit.
 Audit with lynis
     
