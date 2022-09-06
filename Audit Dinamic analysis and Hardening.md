@@ -62,6 +62,12 @@
 
         ![6c](/Images/6c.PNG)
 
+    8. Check accounts with no passwords.
+
+    `sudo awk -F: '$2 == "" { print $1 }' /etc/shadow`
+    
+    ![6d](/Images/6d.PNG)
+
     Observations: 
     
     - User Jack does not match the baseline.
@@ -254,40 +260,107 @@ Use a sandbox to analyse a suspicious script.
 
 ---
 
+- ### Permissions
 
+    1. Set sensitive files permissions and verify changes
 
-Correct vulnerabilities found during the audit. Manipulate Users and Groups to give the rights priviledges accordingly wiht less priviledge principle. Moreover, install packages for tripwire, lynis, and chkrootkit.
-Audit with lynis
-    
-2) Dinamic analysis
-run script in sandbox
-top
-ps aux |less
-sudo kill <PID>
-killall <PROCESS NAME>
-Check with top and ps aux
+        ```
+        sudo chmod 600 /etc/shadow
+        sudo chmod 600 /etc/gshadow
+        sudo chmod 644 /etc/passwd
+        sudo chmod 644 /etc/group
+        ```       
 
-HARDENING
-Disable unused SERVICES
-systemctl -t service --all
-systemctl status smbd
-sudo systemctl stop smbd
-sudo apt remove samba
-//enable and start //
+        `ls -lah /etc | grep -e shadow -e gshadow -e psswd -e group`
 
-Disable correponding service USERS
-grep ftp /etc/passwd
-grep ftp /etc/group
-sudo deluser --remove-all-files ftp
+        ![24](/Images/24.PNG)
 
+---
 
-INSTALLING TRIPWARE
-sudo adduser --system --no-create-home tripware
-suoders
+- ### Disabling unused services
+    Serivices to disable:
+   
+    - FTP (vsftpd.service)  
+    - HTTP (apache2.service) (nginx.service)
+   
+    1. Check services
+        `systemctl -t service --all`
 
-chkrootkit
+        ![25](/Images/25.PNG)
 
-put users in the correct group
+    3. FTP (vsftpd.service)
 
+        ```
+        systemctl status vsftpd
+        sudo systemctl stop vsftpd
+        systemctl status vsftpd
+        sudo systemctl disable vsftpd
+        sudo apt remove -y ftp
+        ```
 
+        ![26](/Images/26.PNG)
 
+    5. HTTP (apache2.service)
+
+        ```
+        systemctl status apache2
+        sudo systemctl stop apache2
+        systemctl status apache2
+        sudo systemctl disable apache2
+        sudo apt remove -y apache2
+        ```
+
+        ![27](/Images/27.PNG)
+
+---
+
+- ### Removing correponding service USERS
+    Users to remove:
+  
+    - FTP
+    - HTTP
+
+    1. Check services Users
+
+        `users=(ftp http); for user in ${users[@]}; do grep $user /etc/passwd && grep $user /etc/group; done`
+
+        ![28](/Images/28.PNG)
+
+    2. Remove Users
+        
+        `users=(ftp http); for user in ${users[@]}; do sudo deluser --remove-all-files $user; done`
+
+    3. Verified Changes
+
+          `users=(ftp http); for user in ${users[@]}; do grep $user /etc/passwd && grep $user /etc/group; done`
+
+        ![29](/Images/29.PNG)
+       
+---
+
+- ### Creating system users for software
+    System users to install:
+
+    - Tripware
+    - Chkrootkit
+
+    1. Tripware: create and verified, no home, system UID, No password, no loginshell. Give sudo privilege
+
+        `sudo adduser --system --no-create-home tripware`
+        `cat /etc/passwd | grep tripware`
+        `ls /home | grep tripware`
+
+        ![30](/Images/30.PNG)
+
+        `sudo visudo`
+        `tripwire ALL= NOPASSWD: /usr/sbin/tripwire`
+
+        ![31](/Images/31.PNG)
+
+    2. Chkrootkit
+
+        `sudo adduser --system --no-create-home chkrootkit`
+        `cat /etc/passwd | grep chkrootkit`
+        `ls /home | grep chkrootkit`
+
+        ![32](/Images/32.PNG)
