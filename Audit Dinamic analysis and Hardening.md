@@ -24,13 +24,13 @@
 
     1. check auth.log for suspicious logins login attemps
 
-         ![3](/Images/3.PNG)      
-
+        ![3](/Images/3.PNG)
+        
     2. check scripts in /tmp directory
 
         `ls -lah /tmp | grep '[-r][-w]x' | grep ^-`
 
-         ![4](/Images/4.PNG)
+        ![4](/Images/4.PNG)
 
     3. Check unmathched users between the /home directory and the baseline. 
 
