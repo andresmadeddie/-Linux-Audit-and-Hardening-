@@ -23,7 +23,9 @@
 - ### Audit file system
 
     1. check auth.log for suspicious logins login attemps
-
+        
+        `cat /var/log/auth.log`
+        
         ![3](/Images/3.png)
 
     2. check scripts in /tmp directory
@@ -50,6 +52,10 @@
 
         ![6a](/Images/6a.PNG)
 
+        ![6ab](/Images/6ab.PNG)
+
+        ![6ac](/Images/6ac.PNG)
+
     6. Check sudoers file
 
         `sudo cat /etc/sudoers`    
@@ -64,19 +70,30 @@
 
     8. Check accounts with no passwords.
 
-    `sudo awk -F: '$2 == "" { print $1 }' /etc/shadow`
+        `sudo awk -F: '$2 == "" { print $1 }' /etc/shadow`
+        
+        ![6d](/Images/6d.PNG)
+
+    9. Check passwords strenght
+
+    `sudo john /etc/shadow`
     
-    ![6d](/Images/6d.PNG)
+    ![6e](/Images/6e.PNG)
+
 
     Observations: 
     
-    - User Jack does not match the baseline.
+    - User Jack, http, and user .hashes does not match the baseline.
     - User Adam has 0 UID
     - str.sh script exists on the /tmp directory owned by user Jack.
+    - a9xk.sh script in the /tmp directory is owned by current user.
     - Jack user has full sudo privilege
     - Max user has less sudo privilege
     - Jack is in the sudo Group
     - Max is in the hax0rs group
+    - Weak passwords
+
+
 
         ---
 
@@ -104,7 +121,7 @@
 
         ![9](/Images/9.PNG)
 
-    4. Kill all processes from user
+    4. Kill all processes from user jack
 
         `sudo killall -u jack`
 
@@ -117,7 +134,7 @@
 
     Observations: 
 
-    Processes were running in the system related to the script str.sh owned by user jack.
+    The processes related to the script str.sh owned by user jack were consuming the CPU resources of the system generating an availability problem.
 
     ---
 
@@ -138,7 +155,7 @@
 
 ## Dinanic Analysis
 
-Use a sandbox to analyse a suspicious script.
+After move a9xk.sh script to a sandbox, the next analysis is made.
 
 1. Check Script
     `nano a9xk.sh`
@@ -148,6 +165,8 @@ Use a sandbox to analyse a suspicious script.
 2. run script
 
     `sudo ./a9xk.sh`
+
+    ![12a](/Images/12a.PNG)
 
 3. inspect processes
 
@@ -162,7 +181,6 @@ Use a sandbox to analyse a suspicious script.
     ![14](/Images/14.PNG)
 
 5. Inspect processes
-
 
     ![15](/Images/15.PNG)
 
