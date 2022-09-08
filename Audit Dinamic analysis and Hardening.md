@@ -10,13 +10,15 @@
 
     The next script give a general gist of the system. Information include Host name, Ip, user's priviledges, OS, RAM, CPU, disk, Processes, DNS, executables, and sensitive files permissions.
 
-    Script: [QuickAudit](/QuickAudit.sh)
+    Script: [QuickAudit](/quickAudit.sh)
 
     ` sudo ./quickAudit.sh`
 
     ![1](/Images/1.PNG)
 
     ![2](/Images/2.PNG)
+
+    ![2a](/Images/2a.PNG)  
 
     ---
 
@@ -27,6 +29,7 @@
         `cat /var/log/auth.log`
         
         ![3](/Images/3.png)
+        ![3a](/Images/3a.png)
 
     2. check scripts in /tmp directory
 
@@ -35,6 +38,7 @@
         ![4](/Images/4.PNG)
 
     3. Check unmathched users between the /home directory and the baseline. 
+        >###### note: The next script needs the file usersBaseline. You can downloades from this repository using the next link: `wget https://raw.githubusercontent.com/andresmadeddie/Linux-Hardenning-Auditing/main/Resources/usersBaseline.txt`
 
         `a=0; echo -e "\nUnmatched Users List:" && for user in $(ls /home); do if [ ! $(grep $user ~/usersBaseline.txt) ]; then echo $user && a=$(($a+1)); fi; done ; if [ $a -eq 0 ]; then echo "No unmatched users found"; fi`
 
@@ -60,25 +64,25 @@
 
         `sudo cat /etc/sudoers`    
 
-        ![6b](/Images/6b.PNG)
+        ![6d](/Images/6d.PNG)
 
     7. Check Users and groups UID GID
 
         `for user in $(ls /home); do id $user; done`
 
-        ![6c](/Images/6c.PNG)
+        ![6e](/Images/6e.PNG)
 
     8. Check accounts with no passwords.
 
         `sudo awk -F: '$2 == "" { print $1 }' /etc/shadow`
         
-        ![6d](/Images/6d.PNG)
+        ![6f](/Images/6f.PNG)
 
     9. Check passwords strenght
 
     `sudo john /etc/shadow`
     
-    ![6e](/Images/6e.PNG)
+    ![6e](/Images/6g.PNG)
 
 
     Observations: 
@@ -86,7 +90,7 @@
     - User Jack, http, and user .hashes does not match the baseline.
     - User Adam has 0 UID
     - str.sh script exists on the /tmp directory owned by user Jack.
-    - a9xk.sh script in the /tmp directory is owned by current user.
+    - a9xk.sh script needs review.
     - Jack user has full sudo privilege
     - Max user has less sudo privilege
     - Jack is in the sudo Group
@@ -101,10 +105,10 @@
 
     1. Check running processes, sort by CPU
 
-            ```
-            top
-            x
-            ```
+        ```
+        top
+        x
+        ```
 
         ![7](/Images/7.PNG)
 
@@ -127,7 +131,7 @@
 
         ![10](/Images/10.PNG)
 
-    5. Inspect processes
+    5. Inspect processes were killed
 
         ![11](/Images/11.PNG)
 
@@ -142,14 +146,17 @@
 
     Update system, Install lynis, and audit system
 
-        ```
-        sudo apt update && apt upgrade
+    ```
+    sudo apt update && apt -y upgrade
 
-        sudo apt install -y linys
+    sudo apt install -y lynis
 
-        sudo lynis audit system
-        ```
+    sudo lynis audit system
+    ```
 
+    ![11a](/Images/11a.PNG)
+
+    >note: lynis analysis will not be included in this exercise
     ---
 ---
 
