@@ -82,20 +82,31 @@
 
     `sudo john /etc/shadow`
     
-    ![6e](/Images/6g.PNG)
+    ![6g](/Images/6g.PNG)
+
+    10. View file user.hashes
+
+    ![6h](/Images/6h.PNG)
+
+    11. Check http user folders
+
+    ![6i](/Images/6i.PNG)
+    ![6j](/Images/6j.PNG)
+
 
 
     Observations: 
     
     - User Jack, http, and user .hashes does not match the baseline.
-    - User Adam has 0 UID
+    - User Adam has 0 UID.
     - str.sh script exists on the /tmp directory owned by user Jack.
     - a9xk.sh script needs review.
-    - Jack user has full sudo privilege
-    - Max user has less sudo privilege
-    - Jack is in the sudo Group
-    - Max is in the hax0rs group
-    - Weak passwords
+    - Jack user has full sudo privilege.
+    - Max user has less sudo privilege.
+    - Jack is in the sudo Group.
+    - Max is in the hax0rs group.
+    - Weak passwords.
+    - Passwords has been compromised.
 
 
 
@@ -195,93 +206,121 @@ After move a9xk.sh script to a sandbox, the next analysis is made.
 
 ## Hardening
 
-- ### Groups - Users
-    Observations:
+Observations:
 
-    Users adam, billy, sally, and max should be part only of theirs primary and deverlopers groups. User Jack and group hax0rs must be removed.
+Users adam, billy, sally, and max should be part only of theirs primary and deverlopers groups. User jack, user.hashes, http, and group hax0rs must be removed. hax0rs will be deleted as a file, jack will be deleted as a user, http will be  deleted as a user-service, and hax0rs as a group.
 
-    1. Remove Jack user
-        - Lock account
+passwd -e [username]
 
-            `sudo usermod -L jack`      
+- 1. Remove user.hashes file
+- 2. Remove jack
+- 3. Change Adam's UID
+- 4. Assing users to corresponding group
+- 5. Remove hax0rs group
+- 6. Remove services http and ftp
+- 7. Remove user-service http and ftp
+- 8. Make users enter a new passwords on next login.
 
-        - Remove user
-
-            `sudo deluser --remove-home --remove-all-files jack`
-
-        - Check user does not exists in the passwd file
-
-            `cat /etc/passwd |grep jack`
-
-        - Check user does not exists in the sudo group 
-
-            `cat /etc/group | grep sudo`
-
-            ![16](/Images/16.PNG)
-
-    2. Change Adam's UID
-
-        - Check if adam's group exists
-
-            `cat /etc/group | grep adam` 
-
-            ![17](/Images/17.PNG)
-
-        - Check for an unassigned UID
-
-            `cat /etc/passwd | awk -F : '{print $3}' | sort` 
-
-            ![18](/Images/18.PNG)
-
-        - Change UID and GID
-            
-            `sudo nano /etc/passwd`
+1. ### Remove user.hashes file
+    - Delete user.hashes
         
-            Manually Change adam's UID and GID from 0 to 1014 and 1009 respectively
-        
-           ![19](/Images/19.PNG)
+        `sudo rm /home/user.hashes`
 
-           `Ctrl x`
-
-           `y` 
-           
-           `enter`    
-        
-        - Check changes
-
-            `id adam`
-
-            ![20](/Images/20.PNG)
-
+        ![16](/Images/16.PNG)
+    
+2. ### Remove jack
        
-    3. Made users adam, billy, sally, and max part only of their primary and developers groups.
-        - Create developers group
+    - Lock jack account.
 
-            `sudo addgroup developers`
+        `sudo usermod -L jack`
 
-        - Add users to developers group and exclude them form any other group
+        ![16a](/Images/16a.PNG)
 
-            `users=(adam billy sally max); for user in ${users[@]}; do sudo usermod -G developers $user; done`
+    - Remove jack user.
 
-        - Check changes
+        `sudo deluser --remove-home --remove-all-files jack`
 
-            `users=(adam billy sally max); for user in ${users[@]}; do echo -e "$user: $(id $user)"; done`
-            
-            ![21](/Images/21.PNG)
+        ![16b](/Images/16b.PNG)
 
-    4. Remove Group hax0rs
+    - Check users does not exists in the passwd file.
 
-        - remove hx0rs
+        `cat /etc/passwd | grep jack`
 
-            `sudo delgroup hax0rs`
+        ![16c](/Images/16c.PNG)
 
-            ![22](/Images/22.PNG)
+    - Check jack does not exists in the sudo group. 
 
-        - Verified Changes
+        `cat /etc/group | grep sudo`
 
-            `cat /etc/group | grep hax0rs`
+        ![16d](/Images/16d.PNG)
 
-            ![23](/Images/23.PNG)
+3. ### Change Adam's UID
+
+    - Check if adam's group exists
+
+        `cat /etc/group | grep adam` 
+
+        ![17](/Images/17.PNG)
+
+    - Check for an unassigned UID (1007 is available)
+
+        `cat /etc/passwd | awk -F : '{print $3}' | sort` 
+
+        ![18](/Images/18.PNG)
+
+    - Change UID and GID
+        
+        `sudo nano /etc/passwd`
+
+        Manually Change adam's UID and GID from 0 to 1007 and 1009 respectively
+
+        ![19](/Images/19.PNG)
+
+        ```
+        Ctrl x
+        y
+        enter
+        ```   
+
+    - Check changes
+
+        `id adam`
+
+        ![20](/Images/20.PNG)
+         
+4. ### Assing users to corresponding group. Adam, billy, sally and max should belong only to developers and their main groups.
+
+    - Create developers group
+
+        `sudo addgroup developers`
+
+        ![21](/Images/21.PNG)
+
+    - Add users to developers group and exclude them form any other group
+
+        `users=(adam billy sally max); for user in ${users[@]}; do sudo usermod -G developers $user; done`
+
+        ![21a](/Images/21a.PNG)
+
+    - Check changes
+
+        `users=(adam billy sally max); for user in ${users[@]}; do echo -e "$user: $(id $user)"; done`
+        
+        ![21b](/Images/21b.PNG)
+
+5. ### Remove hax0rs group
+
+    - remove hx0rs
+
+        `sudo delgroup hax0rs`
+
+        ![22](/Images/22.PNG)
+
+    - Verified Changes
+
+        `cat /etc/group | grep hax0rs`
+
+        ![23](/Images/23.PNG)
 
 ---
 
@@ -296,10 +335,11 @@ After move a9xk.sh script to a sandbox, the next analysis is made.
         sudo chmod 644 /etc/group
         ```       
 
-        `ls -lah /etc | grep -e shadow -e gshadow -e psswd -e group`
+        `ls -lah /etc | grep -e shadow -e gshadow -e passwd -e group`
 
         ![24](/Images/24.PNG)
 
+    2. sudoers file
 ---
 
 - ### Disabling unused services
@@ -325,6 +365,8 @@ After move a9xk.sh script to a sandbox, the next analysis is made.
 
         ![26](/Images/26.PNG)
 
+        ![26a](/Images/26a.PNG)
+
     5. HTTP (apache2.service)
 
         ```
@@ -336,6 +378,8 @@ After move a9xk.sh script to a sandbox, the next analysis is made.
         ```
 
         ![27](/Images/27.PNG)
+
+        ![27a](/Images/27a.PNG)
 
 ---
 
@@ -355,12 +399,22 @@ After move a9xk.sh script to a sandbox, the next analysis is made.
         
         `users=(ftp http); for user in ${users[@]}; do sudo deluser --remove-all-files $user; done`
 
+        ![28a](/Images/28a.PNG)
+        
     3. Verified Changes
 
           `users=(ftp http); for user in ${users[@]}; do grep $user /etc/passwd && grep $user /etc/group; done`
 
         ![29](/Images/29.PNG)
-       
+
+
+
+- Check jack, http, and user.hashes do not exist in the home directory
+
+    `ls /home`
+    
+    ![16e](/Images/16e.PNG)
+
 ---
 
 - ### Creating system users for software
