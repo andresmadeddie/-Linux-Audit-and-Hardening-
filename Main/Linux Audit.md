@@ -3,6 +3,8 @@
 - Quick Audit
 - File System Audit
 - Process Audit
+- Lynis
+- Chkrootkit
 
 ---
 ---
@@ -159,8 +161,8 @@
 
     Processes related to the str.sh script owned by user jack were consuming the system's CPU resources, causing an availability issue.
 
-    ---
-    ---
+---
+---
 
 - ### Lynis Audit
 
@@ -175,3 +177,16 @@
     ```
 
     ![11a](/Images/11a.PNG)
+
+---
+---
+
+- ### Chkrootkit
+
+    sudo apt install chrootkit
+
+    ![11b](/Images/11b.PNG)
+
+    sudo chkrootkit -x
+
+    ![11c](/Images/11c.PNG)
