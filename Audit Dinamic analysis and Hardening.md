@@ -80,20 +80,18 @@
 
     9. Check passwords strenght
 
-    `sudo john /etc/shadow`
-    
-    ![6g](/Images/6g.PNG)
+        `sudo john /etc/shadow`
+        
+        ![6g](/Images/6g.PNG)
 
     10. View file user.hashes
 
-    ![6h](/Images/6h.PNG)
+        ![6h](/Images/6h.PNG)
 
     11. Check http user folders
 
-    ![6i](/Images/6i.PNG)
-    ![6j](/Images/6j.PNG)
-
-
+        ![6i](/Images/6i.PNG)
+        ![6j](/Images/6j.PNG)
 
     Observations: 
     
@@ -210,25 +208,62 @@ Observations:
 
 Users adam, billy, sally, and max should be part only of theirs primary and deverlopers groups. User jack, user.hashes, http, and group hax0rs must be removed. hax0rs will be deleted as a file, jack will be deleted as a user, http will be  deleted as a user-service, and hax0rs as a group.
 
-passwd -e [username]
+- 1. Permissions
+- 2. Remove user.hashes file
+- 3. Remove jack
+- 4. Change Adam's UID
+- 5. Assing users to corresponding group
+- 6. Remove hax0rs group
+- 7. Remove services http and ftp
+- 8. Remove service-users http and ftp
+- 9. Home Directory verificaton
+- 10. Make users enter a new passwords on next login.
+- 11. Aditional settings: Creating system users, Create a developers share folder
 
-- 1. Remove user.hashes file
-- 2. Remove jack
-- 3. Change Adam's UID
-- 4. Assing users to corresponding group
-- 5. Remove hax0rs group
-- 6. Remove services http and ftp
-- 7. Remove user-service http and ftp
-- 8. Make users enter a new passwords on next login.
+---
 
-1. ### Remove user.hashes file
+1. ### Permissions
+
+    - Set sensitive files permissions and verify changes
+
+        ```
+        sudo chmod 600 /etc/shadow
+        sudo chmod 600 /etc/gshadow
+        sudo chmod 644 /etc/passwd
+        sudo chmod 644 /etc/group
+        ```       
+
+        `ls -lah /etc | grep -e shadow -e gshadow -e passwd -e group`
+
+        ![24](/Images/24.PNG)
+
+        >Note: the backup files, like "shadow-", will update theirs permissions after change the files like adding or removing a user. (check remove service user at 8.5)
+
+    - Remove max sudo privileges from the sudoers file
+
+        `sudo visudo`
+
+        manually remove the line `max  ALL=(ALL:ALL) /usr/bin/less` from the file
+        | Before | After |
+        | --- | --- |
+        | ![24a](/Images/24a.PNG) | ![24b](/Images/24b.PNG) |
+
+        ```
+        Ctrl x
+        y
+        ```
+---
+
+2. ### Remove user.hashes file
     - Delete user.hashes
         
         `sudo rm /home/user.hashes`
 
         ![16](/Images/16.PNG)
-    
-2. ### Remove jack
+
+---
+
+3. ### Remove jack
        
     - Lock jack account.
 
@@ -238,11 +273,11 @@ passwd -e [username]
 
     - Remove jack user.
 
-        `sudo deluser --remove-home --remove-all-files jack`
+        `sudo deluser --remove-home jack`
 
         ![16b](/Images/16b.PNG)
 
-    - Check users does not exists in the passwd file.
+    - Check jack does not exists in the passwd file.
 
         `cat /etc/passwd | grep jack`
 
@@ -254,7 +289,15 @@ passwd -e [username]
 
         ![16d](/Images/16d.PNG)
 
-3. ### Change Adam's UID
+    - Check jack home directory is removed
+
+    `ls /home | grep jack`
+    
+    ![16e](/Images/16e.PNG)
+
+---
+
+4. ### Change Adam's UID
 
     - Check if adam's group exists
 
@@ -288,7 +331,9 @@ passwd -e [username]
 
         ![20](/Images/20.PNG)
          
-4. ### Assing users to corresponding group. Adam, billy, sally and max should belong only to developers and their main groups.
+---
+
+5. ### Assing users to corresponding group. Adam, billy, sally and max should belong only to developers and their main groups.
 
     - Create developers group
 
@@ -308,7 +353,9 @@ passwd -e [username]
         
         ![21b](/Images/21b.PNG)
 
-5. ### Remove hax0rs group
+---
+
+6. ### Remove hax0rs group
 
     - remove hx0rs
 
@@ -324,34 +371,19 @@ passwd -e [username]
 
 ---
 
-- ### Permissions
-
-    1. Set sensitive files permissions and verify changes
-
-        ```
-        sudo chmod 600 /etc/shadow
-        sudo chmod 600 /etc/gshadow
-        sudo chmod 644 /etc/passwd
-        sudo chmod 644 /etc/group
-        ```       
-
-        `ls -lah /etc | grep -e shadow -e gshadow -e passwd -e group`
-
-        ![24](/Images/24.PNG)
-
-    2. sudoers file
----
-
-- ### Disabling unused services
-    Serivices to disable:
+7. ### Remove services http and ftp
+    Serivices to remove:
    
     - FTP (vsftpd.service)  
     - HTTP (apache2.service) (nginx.service)
    
     1. Check services
-        `systemctl -t service --all`
 
+        `systemctl -t service --all`
+        
         ![25](/Images/25.PNG)
+
+        `q`
 
     3. FTP (vsftpd.service)
 
@@ -371,8 +403,10 @@ passwd -e [username]
 
         ```
         systemctl status apache2
+        q
         sudo systemctl stop apache2
         systemctl status apache2
+        q
         sudo systemctl disable apache2
         sudo apt remove -y apache2
         ```
@@ -383,8 +417,8 @@ passwd -e [username]
 
 ---
 
-- ### Removing correponding service USERS
-    Users to remove:
+8. ### Remove service-users http and ftp
+    Service Users to remove:
   
     - FTP
     - HTTP
@@ -407,23 +441,34 @@ passwd -e [username]
 
         ![29](/Images/29.PNG)
 
+    4. Check jack, http, and user.hashes home directory is removed.
+
+        `ls /home`
+        
+        ![29a](/Images/29a.PNG)
+
+    5. Check shadow file permissions
+
+        `ls -lah /etc | grep -e shadow -e gshadow -e passwd -e group`
+
+        ![29b](/Images/29b.PNG)
 
 
-- Check jack, http, and user.hashes do not exist in the home directory
+---
+10. ### Make users enter a new passwords on next login.
 
-    `ls /home`
-    
-    ![16e](/Images/16e.PNG)
+    `for user in $(ls /home); do sudo passwd -e $user; done`
+
+    ![29c](/Images/29c.PNG)
 
 ---
 
-- ### Creating system users for software
-    System users to install:
+11. ### Aditional settings: 
 
-    - Tripware
-    - Chkrootkit
 
-    1. Tripware: create and verified, no home, system UID, No password, no loginshell. Give sudo privilege
+
+
+    1. Tripwire: create and verified, no home, system UID, No password, no loginshell. Give sudo privilege
 
         `sudo adduser --system --no-create-home tripware`
         `cat /etc/passwd | grep tripware`
@@ -435,11 +480,9 @@ passwd -e [username]
         `tripwire ALL= NOPASSWD: /usr/sbin/tripwire`
 
         ![31](/Images/31.PNG)
+    
+    1. Create Developers share folder
 
-    2. Chkrootkit
-
-        `sudo adduser --system --no-create-home chkrootkit`
-        `cat /etc/passwd | grep chkrootkit`
-        `ls /home | grep chkrootkit`
-
-        ![32](/Images/32.PNG)
+        ```
+        mkdir /home/Developers
+        chown Developers:Developers
