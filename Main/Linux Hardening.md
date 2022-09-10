@@ -14,12 +14,15 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 - 8. Remove system-users http and ftp.
 - 9. Home Directory verification.
 - 10. Make users enter new passwords on the next login.
-- 11. Additional settings: 
+- 11. Remove roots login shell and lock the root account.
+- 12. Additional settings: 
     - Create a system user for tripwire.
     - Create developers share folder.
 
 ---
 ---
+
+![24](/Images/24.PNG)
 
 1. ## Permissions
 
@@ -173,7 +176,7 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 
 ---
 
-7. ### Remove services http and ftp
+7. ## Remove services http and ftp
     Services to remove:   
 
     - FTP. (vsftpd.service)  
@@ -221,7 +224,7 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 
 ---
 
-8. ### Remove service-users http and ftp
+8. ## Remove service-users http and ftp
     Service Users to remove:
   
     - FTP
@@ -261,7 +264,7 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 
 ---
 
-10. ### Make users enter new passwords on the next login
+10. ## Make users enter new passwords on the next login
 
     `for user in $(ls /home); do sudo passwd -e $user; done`
 
@@ -269,7 +272,19 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 
 ---
 
-11. ### Aditional settings: 
+
+11. ## Remove roots login shell and lock the root account.
+
+```
+sudo usermod -s /sbin/nologin root
+sudo usermod -L root
+```
+
+![29d](/Images/29d.PNG)
+
+---
+
+12. ## Aditional settings: 
 
     1. Tripwire:
 
