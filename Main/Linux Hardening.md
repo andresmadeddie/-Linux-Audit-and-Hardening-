@@ -39,7 +39,7 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
         
         ![24](/Images/24.PNG)
 
-        >Note: backup files, such as "shadow-", will update their permissions after a change to the parent file, such as adding or removing a user. (check image at [8.5](/Images/29b.PNG))
+        >Note: backup files, such as "shadow-", will update their permissions after a change to the parent file, such as adding or removing a user. (check image at [8.5](https://github.com/andresmadeddie/Linux-Hardenning-Auditing/blob/main/Main/Linux%20Hardening.md#remove-service-users-http-and-ftp))
 
     - Remove user max sudo privileges from the sudoers file.
 
