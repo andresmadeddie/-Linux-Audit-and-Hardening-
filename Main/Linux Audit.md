@@ -11,7 +11,7 @@
 
 - ## Quick audit
 
-    Script: [quickAudit](/quickAudit.sh)
+    Script: [quickAudit](/Resources/quickAudit.sh)
 
     The quickAudit script gives a general gist of the system. Information includes:
 
