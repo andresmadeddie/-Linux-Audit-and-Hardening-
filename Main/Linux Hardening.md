@@ -22,8 +22,6 @@ Users adam, billy, sally, and max should be part of their primary groups and dev
 ---
 ---
 
-![24](/Images/24.PNG)
-
 1. ## Permissions
 
     - Set sensitive files permissions and verify changes.
