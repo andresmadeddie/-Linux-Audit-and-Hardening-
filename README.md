@@ -1,4 +1,4 @@
-# Linux Landmarks - Linux Audit and Hardening 
+# Linux Audit and Hardening 
 
 | Project links:| | |
 | --- | --- | --- |
